@@ -21,16 +21,24 @@ Prompts:
 
 ## 3. How the Model Works  
 
-Explain your scoring approach in simple language.  
+Think of the recommender as a judge at a talent show. Each song comes up on stage one at a time, the judge gives it points based on how well it fits your taste, and at the end the songs with the most points are your recommendations.
 
-Prompts:  
+**What the judge knows about you.** You tell it four things: your favorite genre (like pop), the mood you want (like happy), how energetic you want the music to be on a scale from calm to intense, and whether you prefer acoustic or electronic sound.
 
-- What features of each song are used (genre, energy, mood, etc.)  
-- What user preferences are considered  
-- How does the model turn those into a score  
-- What changes did you make from the starter logic  
+**What the judge looks at in each song.** Every song in the catalog has a genre label, a mood label, an energy level, and a measure of how acoustic it sounds. The catalog also lists tempo, danceability, and how positive a song feels, but the judge ignores those for now. Tempo and danceability rise and fall almost exactly with energy in this catalog, so counting them too would reward energy three times over.
 
-Avoid code here. Pretend you are explaining the idea to a friend who does not program.
+**How points are given.**
+
+- **Right genre: 2 points.** This counts the most, because people usually describe their taste by genre first.
+- **Right mood: 1 point.** Mood matters, but a song in your genre with a slightly different mood is usually a smaller miss than a song in the wrong genre.
+- **Energy: up to 1 point.** The closer a song's energy is to what you asked for, the more points it gets. A perfect match earns the full point. The judge rewards being *close*, not being *high*: if you want calm music, a calm song beats a loud one.
+- **Sound: up to half a point.** If you like acoustic music, more acoustic songs earn more. If you prefer electronic, the reverse. This is kept small so it mostly settles close calls.
+
+A perfect song would score 4.5 points.
+
+**Turning scores into recommendations.** Once every song has a score, the judge lines them up from highest to lowest and hands you the top five. If two songs tie, the one listed earlier in the catalog goes first. Each recommendation comes with its reasons, such as "genre match" and "energy similarity", so you can see exactly why it was picked.
+
+**Changes from the starter.** The starter came with empty placeholder functions, so I wrote the loading, scoring, and ranking steps. I also added the acoustic-versus-electronic preference to the sample user in `main.py` (the starter's sample only had genre, mood, and energy), made matching ignore capital letters and extra spaces, and added a clear tie-breaking rule and a list of reasons for every recommendation.
 
 ---
 
