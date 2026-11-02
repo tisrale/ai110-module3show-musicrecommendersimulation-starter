@@ -2,16 +2,19 @@
 
 ## Project Summary
 
-In this project you will build and explain a small music recommender system.
+**VibeJudge** is a small content-based music recommender that runs from the command line. You describe your taste (favorite genre, mood, energy level, and acoustic or electronic sound), and it scores all 25 songs in `data/songs.csv` and shows the top 5, each with the reasons it earned its points.
 
-Your goal is to:
+The catalog uses real songs, including five I actually listen to: Ethio-Jazz from Gigi and Tewodros Tadesse, plus reggae from Bob Marley and Alpha Blondy. I tested it with 12 profiles, including my own taste and six "trick" profiles designed to break the scoring.
 
-- Represent songs and a user "taste profile" as data
-- Design a scoring rule that turns that data into recommendations
-- Evaluate what your system gets right and wrong
-- Reflect on how this mirrors real world AI recommenders
+Beyond the core scoring, it also has:
 
-Replace this paragraph with your own summary of what your version does.
+- **Extended attributes:** popularity, release decade, detailed mood tags, language, and an explicit-content filter.
+- **Four ranking modes:** balanced, genre-first, mood-first, and energy-focused (`--mode`).
+- **A diversity penalty** that limits repeated artists and genres in the top 5 (`--diverse`).
+- **Readable table output**, with a summary of every profile.
+- **A bias sweep** (`python -m src.bias_sweep`) that simulates 2,880 users to show which songs the scoring favors.
+
+The biggest thing I learned: the recommender doesn't know music. It only knows the labels and numbers it's given. That's why it missed my own "chill" Ethiopian songs until I described them in its words.
 
 ---
 
@@ -122,6 +125,33 @@ pip install -r requirements.txt
 python -m src.main
 ```
 
+The default output is a compact table for each profile (one row per song, with a short "Why" column), followed by a summary of every profile's #1 song and how many different genres and artists made its top 5:
+
+```
+My Taste (Gigi)  (ethio-jazz / peaceful / energy 0.4)
+  #  Song                         Artist                 Score       Why
+  -- ---------------------------- ---------------------- ----------- ----------------------------------------
+  1  Kahine (My Priest)           Gigi                   4.38/4.50   genre +2.0, mood +1.0, energy +0.95, sound +0.42
+  2  Becher Yider                 Tewodros Tadesse       3.33/4.50   genre +2.0, energy +0.98, sound +0.35
+  3  Abayi                        Gigi                   3.25/4.50   genre +2.0, energy +0.95, sound +0.30
+  4  Clair de Lune                Claude Debussy         2.30/4.50   mood +1.0, energy +0.82, sound +0.48
+  5  Blue in Green                Miles Davis            1.42/4.50   energy +0.97, sound +0.45
+
+SUMMARY
+  Profile                      #1 song                      Score  Genres  Artists
+  ---------------------------- ---------------------------- ------ ------- -------
+  High-Energy Pop              Can't Stop the Feeling!      4.39   4/5     5/5
+  Chill Lofi                   Snowman                      4.43   3/5     5/5
+  ...
+```
+
+Options (they can be combined):
+
+- `--detailed`: every reason on its own line (the format used in the Sample Recommendation Output below)
+- `--profile "Chill Lofi"`: run one profile
+- `--mode genre-first|mood-first|energy-focused`: switch ranking strategy (see Experiment 2)
+- `--diverse`: limit repeated artists and genres (see Experiment 3)
+
 ### Running Tests
 
 Run the starter tests with:
@@ -136,7 +166,7 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Sample Recommendation Output
 
-Output of `python -m src.main` for every profile in `PROFILES` (src/main.py): three normal profiles, one personal profile, and six adversarial / edge-case profiles from the System Evaluation step. Songs are real tracks; their genre, mood, and audio-feature values are hand estimates, not official data.
+Output of `python -m src.main --detailed` for every profile in `PROFILES` (src/main.py): three normal profiles, two personal profiles, one clean-lyrics profile, and six adversarial / edge-case profiles from the System Evaluation step. Songs are real tracks; their genre, mood, and audio-feature values are hand estimates, not official data.
 
 ### High-Energy Pop
 
@@ -303,6 +333,88 @@ Only one rock song exists, so #2-#5 drop by 2+ points and are ranked mostly on e
 ```
 
 Personal profile built around songs I actually listen to. All three Ethio-Jazz songs fill #1-#3, then the "peaceful" mood pulls in Clair de Lune. Under the Chill Lofi profile these same songs ranked #8 or lower, because they are not labeled "lofi" or "chill".
+
+### My Taste+ (Mood Tags)
+
+```
+============================================================
+ My Taste+ (Mood Tags): top 5 for ethio-jazz / peaceful / energy 0.4
+============================================================
+
+1. Kahine (My Priest) by Gigi
+   Score: 4.62 / 5.25
+     - genre match (+2.0)
+     - mood match (+1.0)
+     - energy similarity (+0.95)
+     - acoustic sound (+0.42)
+     - mood tags devotional (+0.25)
+
+2. Abayi by Gigi
+   Score: 3.50 / 5.25
+     - genre match (+2.0)
+     - energy similarity (+0.95)
+     - acoustic sound (+0.30)
+     - mood tags nostalgic (+0.25)
+
+3. Becher Yider by Tewodros Tadesse
+   Score: 3.33 / 5.25
+     - genre match (+2.0)
+     - energy similarity (+0.98)
+     - acoustic sound (+0.35)
+
+4. Clair de Lune by Claude Debussy
+   Score: 2.30 / 5.25
+     - mood match (+1.0)
+     - energy similarity (+0.82)
+     - acoustic sound (+0.48)
+
+5. Aruarian Dance by Nujabes
+   Score: 1.64 / 5.25
+     - energy similarity (+1.00)
+     - acoustic sound (+0.39)
+     - mood tags nostalgic (+0.25)
+
+============================================================
+```
+
+Same as My Taste, plus the mood tags spiritual / devotional / nostalgic (up to +0.75). Kahine gains for "devotional" and Abayi for "nostalgic", so Abayi passes Becher Yider. Take Me Home, Country Roads (tagged nostalgic) climbs from #12 to #6, just outside the top 5. Jerusalem stays far down.
+
+### Clean Hip-Hop
+
+```
+============================================================
+ Clean Hip-Hop: top 5 for hip-hop / confident / energy 0.78
+============================================================
+
+1. Can't Stop the Feeling! by Justin Timberlake
+   Score: 1.37 / 4.50
+     - energy similarity (+0.96)
+     - electronic sound (+0.41)
+
+2. Nightcall by Kavinsky
+   Score: 1.36 / 4.50
+     - energy similarity (+0.97)
+     - electronic sound (+0.39)
+
+3. Bad Romance by Lady Gaga
+   Score: 1.32 / 4.50
+     - energy similarity (+0.85)
+     - electronic sound (+0.47)
+
+4. Mr. Brightside by The Killers
+   Score: 1.32 / 4.50
+     - energy similarity (+0.87)
+     - electronic sound (+0.45)
+
+5. Levels by Avicii
+   Score: 1.32 / 4.50
+     - energy similarity (+0.83)
+     - electronic sound (+0.49)
+
+============================================================
+```
+
+allow_explicit=False removes explicit songs entirely. HUMBLE. is the only hip-hop song and it is explicit, so this user gets no hip-hop at all, only high-energy filler. A -2.0 penalty was tried first, but HUMBLE. still ranked #1.
 
 ### Edge: Sad but Hyped
 
@@ -570,6 +682,58 @@ The only profile where the genre match loses: EDM (Levels) beats the only classi
 **More accurate, or just different?** Mostly just different. I checked it against my own ranking for "My Taste (Gigi)" (Kahine, Becher Yider, Abayi, Jerusalem, Take Me Home, Country Roads). Both versions get the same 3 of my 5 songs in the top 5, and my #4 and #5 stay at ranks 16 and 12 either way, because neither song matches the genre, the mood, or the 0.4 energy target. The only real effect was a narrower lead: Abayi's margin over Clair de Lune shrank from 0.95 to 0.08. For High-Energy Pop the change looks more sensible (the happy song now beats the intense one), but that is a judgment call, not a measured improvement. Changing weights reshuffles songs that already fit the profile; it can't find songs my profile doesn't describe.
 
 After recording these results, the weights were restored to the original recipe (genre 2.0, energy 1.0), which the Sample Recommendation Output above uses.
+
+### Experiment 2: Ranking modes
+
+You can now switch between four ranking strategies without editing code:
+
+```
+python -m src.main                                   # balanced (default)
+python -m src.main --mode genre-first
+python -m src.main --mode mood-first
+python -m src.main --mode energy-focused --profile "Chill Lofi"
+```
+
+The rules are the same in every mode. Only the points change, and every mode tops out at 4.5, so scores are comparable:
+
+| Mode | Genre | Mood | Energy | Sound | Idea |
+|---|---|---|---|---|---|
+| balanced | 2.0 | 1.0 | 1.0 | 0.5 | The original recipe |
+| genre-first | 3.0 | 0.5 | 0.75 | 0.25 | "I only listen to my genre" |
+| mood-first | 1.0 | 2.0 | 1.0 | 0.5 | "Match how I feel right now" |
+| energy-focused | 1.0 | 0.5 | 2.5 | 0.5 | "Match the intensity, any style" |
+
+**What changed:**
+
+- **Energetic Classical shows the modes clearly.** Genre-first puts Clair de Lune (the only classical song) at #1. Balanced puts it at #2. Mood-first drops it to #5, and energy-focused removes it from the top 5.
+- **My Taste (Gigi):** mood-first moves Clair de Lune (mood "peaceful") up to #2, above Becher Yider and Abayi, which don't match the mood. That doesn't match my own ranking, so mood-first is the wrong mode for me.
+- **High-Energy Pop:** mood-first finally ranks Electric Feel (happy) above Bad Romance (intense).
+- **Deep Intense Rock didn't change in any mode.** Its one rock song matches every rule, so the weights don't matter.
+- The #1 song stayed the same in every mode for 10 of the 12 profiles. The exceptions are Energetic Classical, where the user's genre and mood point to different songs, and Clean Hip-Hop, which has no genre match at all, so energy-focused swaps in Nightcall.
+
+### Experiment 3: Diversity penalty
+
+Add `--diverse` to spread the top 5 across artists and genres. It works with any mode:
+
+```
+python -m src.main --diverse
+python -m src.main --mode mood-first --diverse --profile "My Taste (Gigi)"
+```
+
+**How it works:** the top 5 is picked one song at a time. Each candidate loses 1.0 point for every already-picked song by the same artist, and 0.5 for every already-picked song in the same genre. There's also a hard cap of 2 songs per artist and 2 per genre. The penalty shows up in the reasons, like `diversity penalty (-0.50: repeat genre x1)`. It's off by default, so the Sample Recommendation Output above is unchanged.
+
+**Why the hard cap:** the penalty alone didn't prevent repeats. Chill Lofi still got 3 lofi songs, because the third one was far enough ahead to absorb the penalty. With the cap, no top 5 has more than 2 songs from one genre or 1 from one artist, in any mode.
+
+**What changed:**
+
+| Profile | Normal top 5 | With `--diverse` |
+|---|---|---|
+| Chill Lofi | 3 lofi songs (Snowman, Affection, Aruarian Dance) | Aruarian Dance is replaced; Kahine (My Priest) enters at #5 |
+| My Taste (Gigi) | Kahine, Becher Yider, Abayi (2 Gigi songs) | Abayi drops out (second Gigi song, third ethio-jazz song) |
+| My Taste+ (Mood Tags) | Kahine, Abayi, Becher Yider, ... | Abayi drops out, and **Take Me Home, Country Roads enters at #5**, one of my own top-5 picks |
+| Deep Intense Rock | 2 pop songs (Bad Romance, Can't Stop the Feeling!) | Can't Stop the Feeling! is replaced by HUMBLE. |
+
+**The trade-off:** diversity helped my taste in one way and hurt it in another. It finally brought Country Roads into my list, but it also pushed out Abayi, which I ranked #3, just because Gigi already had a song. Diversity is good for discovery, but a user who really wants more of one artist would find it annoying. That's why it's a switch, not the default.
 
 ---
 

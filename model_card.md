@@ -14,7 +14,7 @@ VibeJudge suggests 5 songs from a small catalog. You tell it your favorite genre
 
 It assumes a few things about you:
 
-- You have one favorite genre and one mood.
+- You have one favorite genre and one mood. (You can add optional extras: detailed mood tags, a decade, a language, hits vs. hidden gems, and no explicit songs.)
 - You can describe your energy level as a number from 0 (calm) to 1 (intense).
 - Your words match the catalog's labels exactly ("hip-hop", not "hip hop").
 
@@ -39,6 +39,12 @@ Think of the recommender as a judge at a talent show. Each song comes up on stag
 
 A perfect song would score 4.5 points.
 
+**Extras I added later.** All of these are optional, so the basic recipe above still gives the same results:
+
+- **Extra preferences.** A profile can also ask for mood tags (+0.25 each, up to +0.75), a decade (+0.5), a language (+0.5), or hits vs. hidden gems (up to +0.5). The top score goes up to match, for example 5.25. "No explicit songs" isn't a penalty. It removes those songs completely.
+- **Ranking modes.** The same rules with different points: genre-first, mood-first, and energy-focused. Each one still tops out at 4.5.
+- **Diversity.** With `--diverse`, the judge picks the top 5 one at a time. A song loses points if its artist or genre is already on the list, and no list can have more than 2 songs from one artist or genre.
+
 **Turning scores into recommendations.** Once every song has a score, the judge lines them up from highest to lowest and hands you the top five. If two songs tie, the one listed earlier in the catalog goes first. Each recommendation comes with its reasons, such as "genre match" and "energy similarity", so you can see exactly why it was picked.
 
 **Changes from the starter.** The starter came with empty placeholder functions, so I wrote the loading, scoring, and ranking steps. I also added the acoustic-versus-electronic preference to the sample user in `main.py` (the starter's sample only had genre, mood, and energy), made matching ignore capital letters and extra spaces, and added a clear tie-breaking rule and a list of reasons for every recommendation.
@@ -52,6 +58,14 @@ The catalog is `data/songs.csv`. It has 25 songs.
 - **Genres (18):** pop, lofi, rock, ambient, jazz, synthwave, indie pop, hip-hop, classical, country, r&b, metal, reggae, edm, folk, latin, blues, and ethio-jazz.
 - **Moods (16):** happy, chill, intense, relaxed, moody, focused, confident, peaceful, nostalgic, romantic, angry, uplifting, energetic, sad, festive, and melancholic.
 - **Numbers for each song:** energy, tempo, valence (how happy it sounds), danceability, and acousticness.
+- **Extended attributes (added later):**
+  - `popularity`: 0–100, how well-known the song is.
+  - `release_decade`: for example, 1980 for the 1980s.
+  - `mood_tags`: 2–3 detailed moods, like "devotional;mystical;yearning" for Kahine.
+  - `language`: english, amharic, spanish, instrumental, or multilingual.
+  - `explicit`: true or false. Only HUMBLE. is explicit.
+
+  Each one is scored only when a profile asks for it: shared mood tags (+0.25 each, up to +0.75), decade (+0.5, or +0.25 for a neighboring decade), language (+0.5), popularity or "hidden gems" (up to +0.5), and `allow_explicit=False`, which removes explicit songs entirely. Profiles that don't use them score exactly as before. Popularity and most decades are my estimates. Becher Yider (1980s) and Abayi (2000s) decades come from the sources I found. Kahine's decade is a guess. Popularity would be risky to score: my Ethiopian songs have the lowest values (20–30), so a popularity bonus would push them down even further.
 
 **What I changed:**
 
@@ -97,7 +111,7 @@ The biggest weakness I found is that the +2.0 genre bonus, combined with a profi
 
 ## 7. Evaluation  
 
-**Profiles I tested.** I ran 10 profiles through `python -m src.main` (the full output is in the README):
+**Profiles I tested.** I first ran 10 profiles through `python -m src.main`. Later I added 2 more to test the extended attributes: "My Taste+ (Mood Tags)" and "Clean Hip-Hop." The full output for all 12 is in the README.
 
 - **Three normal profiles:** High-Energy Pop, Chill Lofi, and Deep Intense Rock.
 - **One personal profile:** "My Taste (Gigi)" (ethio-jazz / peaceful / energy 0.4 / acoustic), built around songs I actually listen to.
@@ -118,7 +132,7 @@ The biggest weakness I found is that the +2.0 genre bonus, combined with a profi
 **Simple checks:**
 
 - A profile missing `favorite_mood` crashes with a `KeyError`, and an energy value given as text (`"0.8"`) crashes with a `TypeError`.
-- At first the two unit tests passed only by luck, because the `Recommender` class was still a placeholder that returned songs in file order. I finished the class so it uses the same scoring as `score_song`. Now the tests check the real ranking, and the class gives the same top 5 as `main.py` for all 10 profiles.
+- At first the two unit tests passed only by luck, because the `Recommender` class was still a placeholder that returned songs in file order. I finished the class so it uses the same scoring as `score_song`. Now the tests check the real ranking, and the class gives the same top 5 as `main.py` for all 12 profiles, in every ranking mode, with and without diversity.
 
 ### Comparing profiles side by side
 
@@ -148,7 +162,7 @@ Bad Romance (called "Gym Hero" in the starter data) is a pop song, but its mood 
 
 Think of the recommender as a judge who reads the label on each song first. Bad Romance carries a "pop" label, and the judge gives 2 points for that, the biggest prize there is. Electric Feel's label says "indie pop," which the judge doesn't count as a match, so it only gets 1 point for being happy. Being loud and electronic also suits a high-energy pop fan, so Bad Romance picks up nearly full marks for energy and sound too. The result is that a workout song with the right label beats a happy song with a slightly different one.
 
-Bad Romance also appears in 6 of the 10 profiles' top 5, including the rock, metal, and classical ones. That's not because it fits those people well; it's one of the loudest, most electronic songs in the catalog, so it's the safest fallback for anyone who wants high energy and doesn't get a genre match.
+Bad Romance also appears in 6 of the original 10 profiles' top 5, including the rock, metal, and classical ones. That's not because it fits those people well; it's one of the loudest, most electronic songs in the catalog, so it's the safest fallback for anyone who wants high energy and doesn't get a genre match.
 
 ---
 
@@ -157,7 +171,7 @@ Bad Romance also appears in 6 of the 10 profiles' top 5, including the rock, met
 - **Let users pick more than one genre and mood.** Then my profile could include ethio-jazz, reggae, and country, and Jerusalem and Country Roads could make my list.
 - **Give partial credit for close labels.** "Indie pop" should count a little for a pop fan. "Hip hop" should match "hip-hop."
 - **Use the data we already have.** Valence could tell a happy song from a sad one with the same energy.
-- **Mix up the top 5.** For example, allow at most 2 songs from the same genre, so users see something new.
+- **Mix up the top 5.** *(Now built as `--diverse`: at most 2 songs per genre and 1 per artist in practice. See README Experiment 3.)* Next step: let users choose how much variety they want instead of on/off.
 - **Check the input.** Energy outside 0–1, a missing mood, or text instead of a number should give a clear message, not a crash or a negative score.
 - **Use better data.** More songs per genre, and measured numbers instead of guesses.
 - **Explain misses, too.** Show "no genre match" when a song loses points, not just what it earned.
@@ -168,7 +182,7 @@ Bad Romance also appears in 6 of the 10 profiles' top 5, including the rock, met
 
 **My biggest learning moment.** It was adding my own music. My songs felt "chill" to me, but the system ranked them #6 or lower for the Chill Lofi profile. It only knew the word "lofi," not the feeling. That's when I understood that a recommender doesn't know music. It only knows the labels and numbers we give it. I also saw that the data matters as much as the code. When I made Becher Yider's numbers softer, its rank changed.
 
-**How AI tools helped, and when I had to double-check.** The AI assistant was fast at the heavy work. I chose the scoring rules, and it turned them into code. It also ran all 10 profiles, built comparison tables, and tested 2,880 simulated users to find biases. But it got things wrong when it guessed about my music:
+**How AI tools helped, and when I had to double-check.** The AI assistant was fast at the heavy work. I chose the scoring rules, and it turned them into code. It also ran all 12 profiles, built comparison tables, and tested 2,880 simulated users to find biases. But it got things wrong when it guessed about my music:
 
 - It listed Becher Yider under Teddy Afro. The real artist is Tewodros Tadesse.
 - It put all my Ethiopian songs under one made-up genre, "ethiopian." I found sources that call them Ethio-Jazz.
