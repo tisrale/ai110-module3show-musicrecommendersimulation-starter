@@ -1,6 +1,12 @@
 import csv
 from typing import List, Dict, Tuple, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
+
+# Scoring weights (original recipe). Weight-shift experiment in README: GENRE_WEIGHT = 1.0, ENERGY_WEIGHT = 2.0.
+GENRE_WEIGHT = 2.0
+MOOD_WEIGHT = 1.0
+ENERGY_WEIGHT = 1.0
+ACOUSTIC_WEIGHT = 0.5
 
 @dataclass
 class Song:
@@ -39,12 +45,15 @@ class Recommender:
         self.songs = songs
 
     def recommend(self, user: UserProfile, k: int = 5) -> List[Song]:
-        # TODO: Implement recommendation logic
-        return self.songs[:k]
+        """Rank songs with the same recipe as score_song (ties to lower id) and return the top k."""
+        prefs = asdict(user)
+        ranked = sorted(self.songs, key=lambda song: (-score_song(prefs, asdict(song))[0], song.id))
+        return ranked[:k]
 
     def explain_recommendation(self, user: UserProfile, song: Song) -> str:
-        # TODO: Implement explanation logic
-        return "Explanation placeholder"
+        """Return the song's score and the reasons behind it, e.g. 'Score 4.39: genre match (+2.0), ...'."""
+        score, reasons = score_song(asdict(user), asdict(song))
+        return f"Score {score:.2f}: " + ", ".join(reasons)
 
 def load_songs(csv_path: str) -> List[Dict]:
     """Read songs.csv into a list of dicts, converting id to int and audio features to float."""
@@ -67,23 +76,23 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
     reasons = []
 
     if song["genre"].strip().lower() == user_prefs["favorite_genre"].strip().lower():
-        score += 2.0
-        reasons.append("genre match (+2.0)")
+        score += GENRE_WEIGHT
+        reasons.append(f"genre match (+{GENRE_WEIGHT:.1f})")
 
     if song["mood"].strip().lower() == user_prefs["favorite_mood"].strip().lower():
-        score += 1.0
-        reasons.append("mood match (+1.0)")
+        score += MOOD_WEIGHT
+        reasons.append(f"mood match (+{MOOD_WEIGHT:.1f})")
 
-    # Closer energy earns more: identical = +1.0, opposite ends of the scale = 0.0
-    energy_points = 1.0 - abs(song["energy"] - user_prefs["target_energy"])
+    # Closer energy earns more: identical = +ENERGY_WEIGHT, opposite ends of the scale = 0.0
+    energy_points = ENERGY_WEIGHT * (1.0 - abs(song["energy"] - user_prefs["target_energy"]))
     score += energy_points
     reasons.append(f"energy similarity (+{energy_points:.2f})")
 
     if user_prefs.get("likes_acoustic", False):
-        acoustic_points = 0.5 * song["acousticness"]
+        acoustic_points = ACOUSTIC_WEIGHT * song["acousticness"]
         reasons.append(f"acoustic sound (+{acoustic_points:.2f})")
     else:
-        acoustic_points = 0.5 * (1.0 - song["acousticness"])
+        acoustic_points = ACOUSTIC_WEIGHT * (1.0 - song["acousticness"])
         reasons.append(f"electronic sound (+{acoustic_points:.2f})")
     score += acoustic_points
 

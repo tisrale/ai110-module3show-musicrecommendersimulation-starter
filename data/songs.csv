@@ -1,21 +1,26 @@
 id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness
-1,Sunrise City,Neon Echo,pop,happy,0.82,118,0.84,0.79,0.18
-2,Midnight Coding,LoRoom,lofi,chill,0.42,78,0.56,0.62,0.71
-3,Storm Runner,Voltline,rock,intense,0.91,152,0.48,0.66,0.10
-4,Library Rain,Paper Lanterns,lofi,chill,0.35,72,0.60,0.58,0.86
-5,Gym Hero,Max Pulse,pop,intense,0.93,132,0.77,0.88,0.05
-6,Spacewalk Thoughts,Orbit Bloom,ambient,chill,0.28,60,0.65,0.41,0.92
-7,Coffee Shop Stories,Slow Stereo,jazz,relaxed,0.37,90,0.71,0.54,0.89
-8,Night Drive Loop,Neon Echo,synthwave,moody,0.75,110,0.49,0.73,0.22
-9,Focus Flow,LoRoom,lofi,focused,0.40,80,0.59,0.60,0.78
-10,Rooftop Lights,Indigo Parade,indie pop,happy,0.76,124,0.81,0.82,0.35
-11,Concrete Crown,Mic Atlas,hip-hop,confident,0.78,94,0.62,0.86,0.12
-12,Velvet Requiem,Aurelia Quartet,classical,peaceful,0.22,66,0.55,0.18,0.97
-13,Dusty Porch Lights,Willow Creek Band,country,nostalgic,0.55,104,0.68,0.58,0.74
-14,Silk and Static,Juno Vale,r&b,romantic,0.48,86,0.66,0.72,0.40
-15,Iron Tempest,Graveforge,metal,angry,0.97,176,0.25,0.42,0.03
-16,Island Time,Kaya Roots,reggae,uplifting,0.58,82,0.88,0.80,0.45
-17,Neon Pulse,Voltage Theory,edm,energetic,0.95,128,0.72,0.91,0.02
-18,Paper Boats,Ellis Fern,folk,sad,0.30,96,0.24,0.38,0.93
-19,Fiesta en la Calle,Los Soles,latin,festive,0.86,108,0.90,0.89,0.60
-20,Rainy Day Blues,Delta Ray,blues,melancholic,0.44,70,0.30,0.48,0.68
+1,Can't Stop the Feeling!,Justin Timberlake,pop,happy,0.82,118,0.84,0.79,0.18
+2,Affection,Jinsang,lofi,chill,0.42,78,0.56,0.62,0.71
+3,Mr. Brightside,The Killers,rock,intense,0.91,152,0.48,0.66,0.10
+4,Snowman,WYS,lofi,chill,0.35,72,0.60,0.58,0.86
+5,Bad Romance,Lady Gaga,pop,intense,0.93,132,0.77,0.88,0.05
+6,Weightless,Marconi Union,ambient,chill,0.28,60,0.65,0.41,0.92
+7,Blue in Green,Miles Davis,jazz,relaxed,0.37,90,0.71,0.54,0.89
+8,Nightcall,Kavinsky,synthwave,moody,0.75,110,0.49,0.73,0.22
+9,Aruarian Dance,Nujabes,lofi,focused,0.40,80,0.59,0.60,0.78
+10,Electric Feel,MGMT,indie pop,happy,0.76,124,0.81,0.82,0.35
+11,HUMBLE.,Kendrick Lamar,hip-hop,confident,0.78,94,0.62,0.86,0.12
+12,Clair de Lune,Claude Debussy,classical,peaceful,0.22,66,0.55,0.18,0.97
+13,"Take Me Home, Country Roads",John Denver,country,nostalgic,0.55,104,0.68,0.58,0.74
+14,Adorn,Miguel,r&b,romantic,0.48,86,0.66,0.72,0.40
+15,Master of Puppets,Metallica,metal,angry,0.97,176,0.25,0.42,0.03
+16,Red Red Wine,UB40,reggae,uplifting,0.58,82,0.88,0.80,0.45
+17,Levels,Avicii,edm,energetic,0.95,128,0.72,0.91,0.02
+18,Skinny Love,Bon Iver,folk,sad,0.30,96,0.24,0.38,0.93
+19,Vivir Mi Vida,Marc Anthony,latin,festive,0.86,108,0.90,0.89,0.60
+20,The Thrill Is Gone,B.B. King,blues,melancholic,0.44,70,0.30,0.48,0.68
+21,One Love,Bob Marley & The Wailers,reggae,uplifting,0.55,76,0.85,0.78,0.40
+22,Kahine (My Priest),Gigi,ethio-jazz,peaceful,0.35,84,0.40,0.40,0.85
+23,Abayi,Gigi,ethio-jazz,nostalgic,0.45,92,0.55,0.60,0.60
+24,Becher Yider,Tewodros Tadesse,ethio-jazz,romantic,0.38,78,0.55,0.50,0.70
+25,Jerusalem,Alpha Blondy,reggae,uplifting,0.60,80,0.75,0.75,0.35
